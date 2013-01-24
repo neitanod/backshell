@@ -1,4 +1,8 @@
-<html>
+<?php 
+
+define("MAX_OUTPUT_LENGHT", 20000);
+
+?><html>
   <head>
     <title>Shell - <?php echo(str_replace('<','',$_POST['cmd']));?></title>
   </head>
@@ -10,7 +14,7 @@
       die('You are not allowed to access this file. Check '.basename(__FILE__).' for more information.');
     }
 
-    $unique = !empty($_POST['unique'])?$_POST['unique']:"shelltmp_".md5(rand(1000).date("YmdHis"));
+    $unique = !empty($_POST['unique'])?$_POST['unique']:"bshelltmp_".md5(rand(1000).date("YmdHis"));
     $tmp = is_writable(dirname(__FILE__))?dirname(__FILE__):sys_get_temp_dir(); // on cloud servers we prefer the NFS than a different /tmp/ for every submit.
     $tmppwd = $tmp."/".$unique."_pwd.txt";
     $tmpoutput = $tmp."/".$unique."_output.txt";
@@ -22,7 +26,7 @@
       passthru('cd '.$pwd.' && echo "<hr/>">> '.$tmpoutput.' && echo '.$pwd.'$ '.escapeshellarg($cmd).' >> '.$tmpoutput.' && echo >> '.$tmpoutput.' && '.$cmd .' >> '.$tmpoutput.' 2>&1 && pwd > '.$tmppwd);
       $newpwd = trim(file_get_contents($tmppwd));  //capture new Present (current) Working Directory just in case it changed
       if($newpwd != "") $pwd = $newpwd;  //if something failed, don't change directory
-      echo(file_get_contents($tmpoutput, false, NULL, filesize($tmpoutput)-20000));
+      echo(file_get_contents($tmpoutput, false, NULL, filesize($tmpoutput)-MAX_OUTPUT_LENGHT));
       unlink($tmppwd);
     }
     ?>
